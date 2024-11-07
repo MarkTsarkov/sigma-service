@@ -1,17 +1,13 @@
 package main
 
 import (
-	"fmt"
+	"context"
 	"log"
 
-	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
-	"github.com/marktsarkov/sigma-service/internal/config"
+	"github.com/marktsarkov/sigma-service/config"
+	"github.com/marktsarkov/sigma-service/internal/app"
 )
-
-type environment struct {
-	Port int `envconfig:"PORT"`
-}
 
 func main() {
 	err := godotenv.Load()
@@ -24,18 +20,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	app := fiber.New()
+	ctx := context.Background()
 
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello, World!")
-	})
-
-	app.Get("/env", func(c *fiber.Ctx) error {
-		return c.SendString(fmt.Sprintf("Port: %v\nDatabase: %v", env.GetPort(), env.GetDB()))
-	})
-
-	app.Listen(fmt.Sprintf(":%v", env.GetPort()))
-	if err := app.Listen(":3000"); err != nil {
-		log.Fatal(err)
-	}
+	app.Run(&env, ctx)
 }
