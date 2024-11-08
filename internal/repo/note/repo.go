@@ -50,7 +50,7 @@ func (r *repo) Create(ctx context.Context, note *entity.Note) (int64, error) {
 }
 
 func (r *repo) GetById(ctx context.Context, id int64) (*entity.Note, error) {
-	builder := sq.Select(idColumn, titleColumn, createdAtColumn, updatedAtColumn).
+	builder := sq.Select(idColumn, titleColumn, bodyColumn, createdAtColumn, updatedAtColumn).
 		PlaceholderFormat(sq.Dollar).
 		From(tableName).
 		Where(sq.Eq{"id": id})
