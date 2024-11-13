@@ -4,14 +4,14 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/marktsarkov/sigma-service/config"
 	"github.com/marktsarkov/sigma-service/internal/controller/handlers"
-	repository "github.com/marktsarkov/sigma-service/internal/repo"
+	"github.com/marktsarkov/sigma-service/internal/service"
 )
 
-func NewRouter(app *fiber.App, env *config.Environment, noteRepo repository.NoteRepository) {
+func NewRouter(app *fiber.App, env *config.Environment, service service.NoteService) {
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Hello, World!")
 	})
 	app.Get("/env", handlers.GetEnv(env))
-	app.Post("/notes", handlers.CreateNote(noteRepo))
-	app.Get("/notes", handlers.GetNoteById(noteRepo))
+	app.Post("/notes", handlers.CreateNote(service))
+	app.Get("/notes", handlers.GetNoteById(service))
 }

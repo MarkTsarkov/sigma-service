@@ -3,12 +3,12 @@ package handlers
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/marktsarkov/sigma-service/internal/entity"
-	repository "github.com/marktsarkov/sigma-service/internal/repo"
+	"github.com/marktsarkov/sigma-service/internal/service"
 	"log"
 	"strconv"
 )
 
-func CreateNote(repo repository.NoteRepository) func(c *fiber.Ctx) error {
+func CreateNote(service service.NoteService) func(c *fiber.Ctx) error {
 	return func(c *fiber.Ctx) error {
 		var body entity.Note
 		log.Println(body.Title, body.Body)
@@ -20,7 +20,7 @@ func CreateNote(repo repository.NoteRepository) func(c *fiber.Ctx) error {
 
 		log.Println(body.Title, body.Body)
 
-		id, err := repo.Create(c.Context(), &body)
+		id, err := service.Create(c.Context(), &body)
 		if err != nil {
 			c.Status(fiber.StatusInternalServerError).SendString(err.Error()) // Возвращаем ошибку сервера, если что-то пошло не так
 			return err
