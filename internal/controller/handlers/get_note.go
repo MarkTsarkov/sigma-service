@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/marktsarkov/sigma-service/internal/entity"
-	repository "github.com/marktsarkov/sigma-service/internal/repo"
+	"github.com/marktsarkov/sigma-service/internal/service"
 	"log"
 	"strconv"
 	"time"
 )
 
-func GetNoteById(repo repository.NoteRepository) func(c *fiber.Ctx) error {
+func GetNoteById(service service.NoteService) func(c *fiber.Ctx) error {
 	return func(c *fiber.Ctx) error {
 
 		var note *entity.Note
@@ -26,7 +26,7 @@ func GetNoteById(repo repository.NoteRepository) func(c *fiber.Ctx) error {
 		id := note.ID
 		log.Println(id)
 
-		note, err = repo.GetById(c.Context(), id)
+		note, err = service.GetById(c.Context(), id)
 		if err != nil {
 			fmt.Println(err, "to note")
 			c.Status(fiber.StatusInternalServerError).SendString(err.Error()) // Возвращаем ошибку сервера, если что-то пошло не так

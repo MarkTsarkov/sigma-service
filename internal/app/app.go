@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/marktsarkov/sigma-service/internal/repo/note"
+	repository "github.com/marktsarkov/sigma-service/internal/repo/note"
+	service "github.com/marktsarkov/sigma-service/internal/service/note"
 	"log"
 	"os"
 
@@ -23,8 +24,9 @@ func Run(cfg *config.Environment, ctx context.Context) {
 	}
 	defer pool.Close()
 
-	repo := note.NewRepository(pool)
-	controller.NewRouter(app, cfg, repo)
+	repo := repository.NewRepository(pool)
+	serv := service.NewNoteService(repo)
+	controller.NewRouter(app, cfg, serv)
 
 	if err := app.Listen(fmt.Sprintf(":%v", (*cfg).GetPort())); err != nil {
 		log.Fatal(err)
