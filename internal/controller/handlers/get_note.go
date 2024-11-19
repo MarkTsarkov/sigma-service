@@ -32,14 +32,14 @@ func GetNoteById(service service.NoteService) func(c *fiber.Ctx) error {
 			c.Status(fiber.StatusInternalServerError).SendString(err.Error()) // Возвращаем ошибку сервера, если что-то пошло не так
 			return err
 		}
-
 		response := map[string]string{
 			"id":         strconv.FormatInt(id, 10),
 			"title":      note.Title,
 			"body":       note.Body,
-			"created_at": note.CreatedAt.Format(time.RFC3339),
-			"updated_at": note.UpdatedAt.Format(time.RFC3339),
+			"created_at": note.CreatedAt.Format(time.DateTime),
+			"updated_at": note.UpdatedAt.Format(time.DateTime),
 		}
+
 		return c.JSON(response)
 	}
 }
