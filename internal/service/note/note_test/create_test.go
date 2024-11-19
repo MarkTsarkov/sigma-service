@@ -14,43 +14,55 @@ import (
 
 func TestCreate(t *testing.T) {
 	var (
-		idFromDB int64        = 1
-		note     *entity.Note = &entity.Note{Title: "title", Body: "body"}
-		err      error
-		ctx      = context.Background()
+		ctx = context.Background()
 	)
 
 	tc := []struct {
-		name    string
-		wantErr bool
-		err     error
-		note    *entity.Note
+		name       string
+		wantErr    bool
+		mockReturn struct {
+			id  int64
+			err error
+		}
+		note *entity.Note
 	}{
 		{
 			name:    "success case",
 			wantErr: false,
-			err:     nil,
-			note:    note,
+			mockReturn: struct {
+				id  int64
+				err error
+			}{1, nil},
+			note: &entity.Note{Title: "title", Body: "body"},
 		},
 		{
 			name:    "fall case",
 			wantErr: true,
-			err:     fmt.Errorf("internal error"),
-			note:    note,
+			mockReturn: struct {
+				id  int64
+				err error
+			}{0, fmt.Errorf("internal error")},
+			note: &entity.Note{Title: "title", Body: "body"},
 		},
 	}
 
 	for _, tt := range tc {
+		t.Run(tt.name, func(t *testing.T) {
+			repoMock := new(mocks.NoteRepository)
+			repoMock.EXPECT().Create(mock.Anything, tt.note).Return(tt.mockReturn.id, tt.mockReturn.err)
 
-		repoMock := new(mocks.NoteRepository)
-		repoMock.EXPECT().Create(mock.Anything, note).Return(idFromDB, nil)
+			serv := service.NewNoteService(repoMock)
 
-		serv := service.NewNoteService(repoMock)
+			id, err := serv.Create(ctx, tt.note)
 
-		note.ID, err = serv.Create(ctx, tt.note)
+			if tt.wantErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+				assert.Equal(t, tt.mockReturn.id, id)
+			}
 
-		require.NoError(t, err)
-		assert.Equal(t, idFromDB, note.ID)
-		repoMock.AssertExpectations(t)
+			repoMock.AssertExpectations(t)
+		})
 	}
 }
