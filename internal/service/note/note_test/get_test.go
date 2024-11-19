@@ -15,15 +15,8 @@ import (
 
 func TestGet(t *testing.T) {
 	var (
-		idFromHandler int64        = 1
-		expectedNote  *entity.Note = &entity.Note{
-			ID:        1,
-			Title:     "title",
-			Body:      "body",
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-		}
-		ctx = context.Background()
+		idFromHandler int64 = 1
+		ctx                 = context.Background()
 	)
 
 	tc := []struct {
@@ -38,28 +31,46 @@ func TestGet(t *testing.T) {
 			wantErr: false,
 			err:     nil,
 			id:      idFromHandler,
-			note:    expectedNote,
+			note: &entity.Note{
+				ID:        1,
+				Title:     "title",
+				Body:      "body",
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+			},
 		},
 		{
 			name:    "fall case",
 			wantErr: true,
 			err:     fmt.Errorf("internal error"),
 			id:      idFromHandler,
-			note:    expectedNote,
+			note: &entity.Note{
+				ID:        1,
+				Title:     "title",
+				Body:      "body",
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+			},
 		},
 	}
 
 	for _, tt := range tc {
+		t.Run(tt.name, func(t *testing.T) {
 
-		repoMock := new(mocks.NoteRepository)
-		repoMock.EXPECT().GetById(mock.Anything, idFromHandler).Return(expectedNote, nil)
+			repoMock := new(mocks.NoteRepository)
+			repoMock.EXPECT().GetById(mock.Anything, idFromHandler).Return(tt.note, tt.err)
 
-		serv := service.NewNoteService(repoMock)
+			serv := service.NewNoteService(repoMock)
+			returnedNote, err := serv.GetById(ctx, tt.id)
 
-		returnedNote, err := serv.GetById(ctx, tt.id)
+			if tt.wantErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+				assert.Equal(t, tt.note, returnedNote)
+			}
+			repoMock.AssertExpectations(t)
 
-		require.NoError(t, err)
-		assert.Equal(t, expectedNote, returnedNote)
-		repoMock.AssertExpectations(t)
+		})
 	}
 }
