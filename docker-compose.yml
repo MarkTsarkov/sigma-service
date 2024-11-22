@@ -11,5 +11,17 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  mongodb:
+    image: mongo:6.0     # Последняя стабильная версия MongoDB
+    container_name: mongodb-container
+    ports:
+      - "27017:27017"    # Пробрасываем порт для доступа из хоста
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin   # Имя пользователя для админ-доступа
+      MONGO_INITDB_ROOT_PASSWORD: admin # Пароль для админ-доступа
+    volumes:
+      - mongodb_data:/data/db  # Персистентное хранилище для данных
+
 volumes:
   pgdata:
+  mongodb_data:
