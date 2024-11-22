@@ -1,9 +1,9 @@
-package controller
+package http
 
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/marktsarkov/sigma-service/config"
-	"github.com/marktsarkov/sigma-service/internal/controller/handlers"
+	handlers2 "github.com/marktsarkov/sigma-service/internal/controller/http/handlers"
 	"github.com/marktsarkov/sigma-service/internal/service"
 )
 
@@ -11,7 +11,7 @@ func NewRouter(app *fiber.App, env *config.Environment, service service.NoteServ
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Hello, World!")
 	})
-	app.Get("/env", handlers.GetEnv(env))
-	app.Post("/notes", handlers.CreateNote(service))
-	app.Get("/notes", handlers.GetNoteById(service))
+	app.Get("/env", handlers2.GetEnv(env))
+	app.Post("/notes", handlers2.CreateNote(service))
+	app.Get("/notes", handlers2.GetNoteById(service))
 }

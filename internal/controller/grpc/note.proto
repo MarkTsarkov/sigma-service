@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package note;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/marktsarkov/sigma-service/pkg/note;note";
+
+
+
+service Note {
+  rpc Create(CreateRequest) returns (CreateResponse);
+  rpc GetById(GetByIDRequest) returns (GetByIDResponse);
+}
+
+message NoteContent{
+  string Title = 1;
+  string Body = 2;
+}
+
+message NoteInfo {
+  int64 id = 1;
+  NoteContent content = 2;
+  google.protobuf.Timestamp created_at = 3;
+  google.protobuf.Timestamp updated_at = 4;
+}
+
+message CreateRequest {
+  NoteInfo note = 1;
+}
+
+message CreateResponse {
+  int64 id = 1;
+}
+
+message GetByIDRequest {
+  int64 id = 1;
+}
+
+message GetByIDResponse {
+  NoteInfo note = 1;
+}
