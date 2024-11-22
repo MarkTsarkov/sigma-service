@@ -8,6 +8,9 @@ import (
 	"github.com/marktsarkov/sigma-service/internal/repo"
 	"github.com/marktsarkov/sigma-service/internal/repo/note/converter"
 	"github.com/marktsarkov/sigma-service/internal/repo/note/model"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"log"
 )
 
 const (
@@ -19,14 +22,16 @@ const (
 	updatedAtColumn = "updated_at"
 )
 
-//пишем функции с sql-запросами в бд и отправляем их, возвращаем результат
-
 type repo struct {
-	db *pgxpool.Pool
+	pg *pgxpool.Pool
+	mg *mongo.Client
 }
 
-func NewRepository(db *pgxpool.Pool) repository.NoteRepository {
-	return &repo{db: db}
+func NewRepository(pg *pgxpool.Pool, mg *mongo.Client) repository.NoteRepository {
+	return &repo{
+		pg: pg,
+		mg: mg,
+	}
 }
 
 func (r *repo) Create(ctx context.Context, note *entity.Note) (int64, error) {
@@ -42,10 +47,20 @@ func (r *repo) Create(ctx context.Context, note *entity.Note) (int64, error) {
 	}
 	var id int64
 
-	err = r.db.QueryRow(ctx, query, args...).Scan(&id)
+	err = r.pg.QueryRow(ctx, query, args...).Scan(&id)
 	if err != nil {
 		return 0, err
 	}
+	note.ID = id
+	//добавить замтеку в монгу с ид сгенерированным в постгре
+	collection := r.mg.Database("Notes").Collection("notes")
+
+	mgNote, err := bson.Marshal(note)
+	resultMG, err := collection.InsertOne(ctx, mgNote)
+	if err != nil {
+		return 0, err
+	}
+	log.Printf("В монгу поступила заметка: %d\n", resultMG.InsertedID)
 	return id, nil
 }
 
@@ -61,10 +76,18 @@ func (r *repo) GetById(ctx context.Context, id int64) (*entity.Note, error) {
 
 	var note model.Note
 
-	err = r.db.QueryRow(ctx, query, args...).Scan(&note.ID, &note.Title, &note.Body, &note.CreatedAt, &note.UpdatedAt)
+	err = r.pg.QueryRow(ctx, query, args...).Scan(&note.ID, &note.Title, &note.Body, &note.CreatedAt, &note.UpdatedAt)
 	if err != nil {
 		return nil, err
 	}
+
+	collection := r.mg.Database("Notes").Collection("notes")
+
+	err = collection.FindOne(ctx, bson.M{"id": note.ID}).Decode(&note)
+	if err != nil {
+		return nil, err
+	}
+	log.Printf("Из монги пришла заметка: %d\n", &note.Body)
 
 	return converter.ToNoteFromRepo(&note), nil
 }
