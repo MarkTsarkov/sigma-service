@@ -17,8 +17,8 @@ services:
     ports:
       - "27017:27017"    # Пробрасываем порт для доступа из хоста
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin   # Имя пользователя для админ-доступа
-      MONGO_INITDB_ROOT_PASSWORD: admin # Пароль для админ-доступа
+      MONGO_INITDB_ROOT_USERNAME: ${POSTGRES_USER}     # Имя пользователя для админ-доступа
+      MONGO_INITDB_ROOT_PASSWORD: ${POSTGRES_PASSWORD} # Пароль для админ-доступа
     volumes:
       - mongodb_data:/data/db  # Персистентное хранилище для данных
 
