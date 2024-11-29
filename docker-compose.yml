@@ -13,9 +13,9 @@ services:
 
   mongodb:
     image: mongo:6.0     # Последняя стабильная версия MongoDB
-    container_name: mongodb-container
+    container_name: mongodb-container-sigma
     ports:
-      - "27017:27017"    # Пробрасываем порт для доступа из хоста
+      - "${MONGO_PORT}:27017"    # Пробрасываем порт для доступа из хоста
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${POSTGRES_USER}     # Имя пользователя для админ-доступа
       MONGO_INITDB_ROOT_PASSWORD: ${POSTGRES_PASSWORD} # Пароль для админ-доступа

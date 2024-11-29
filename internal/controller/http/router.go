@@ -13,5 +13,5 @@ func NewRouter(app *fiber.App, env *config.Environment, service service.NoteServ
 	})
 	app.Get("/env", handlers2.GetEnv(env))
 	app.Post("/notes", handlers2.CreateNote(service))
-	app.Get("/notes", handlers2.GetNoteById(service))
+	app.Get("/notes/:id", handlers2.GetNoteById(service))
 }
