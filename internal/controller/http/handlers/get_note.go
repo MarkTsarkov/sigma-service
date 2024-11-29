@@ -5,7 +5,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/marktsarkov/sigma-service/internal/entity"
 	"github.com/marktsarkov/sigma-service/internal/service"
-	"log"
 	"strconv"
 	"time"
 )
@@ -15,16 +14,15 @@ func GetNoteById(service service.NoteService) func(c *fiber.Ctx) error {
 
 		var note *entity.Note
 
-		err := c.BodyParser(&note)
+		idParam := c.Params("id")
+		id, err := strconv.ParseInt(idParam, 10, 64)
+
 		if err != nil {
 			fmt.Println(err, "parser")
 			c.Status(fiber.StatusBadRequest).SendString(err.Error()) // Возвращаем ошибку, если не смогли распарсить тело запроса
 			return err
-		}
 
-		log.Println(note)
-		id := note.ID
-		log.Println(id)
+		}
 
 		note, err = service.GetById(c.Context(), id)
 		if err != nil {
@@ -36,8 +34,8 @@ func GetNoteById(service service.NoteService) func(c *fiber.Ctx) error {
 			"id":         strconv.FormatInt(id, 10),
 			"title":      note.Title,
 			"body":       note.Body,
-			"created_at": note.CreatedAt.Format(time.DateTime),
-			"updated_at": note.UpdatedAt.Format(time.DateTime),
+			"created_at": note.CreatedAt.Format(time.RFC3339),
+			"updated_at": note.UpdatedAt.Format(time.RFC3339),
 		}
 
 		return c.JSON(response)
